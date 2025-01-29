@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="vi">
+<!-- Giữ nguyên phần head và style như cũ -->
+<head>
+    <!-- Giữ nguyên các style đã có -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuyển đổi tất cả hệ cơ số</title>
+    <style>
+        /* Giữ nguyên tất cả style như trước */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+            min-height: 100vh;
+        }
+        .content {
+            max-width: 600px;
+            margin: 0;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 2;
+        }
+        .converter {
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+            color: #333;
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            padding: 12px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76,175,80,0.2);
+        }
+        .error {
+            border-color: #ff4444 !important;
+        }
+        .error-message {
+            color: #ff4444;
+            font-size: 14px;
+            margin-top: -10px;
+            margin-bottom: 10px;
+            display: none;
+        }
+        .copy-button {
+            background: #4CAF50;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .result-container {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            display: none;
+        }
+        .result-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .result-label {
+            min-width: 120px;
+            font-weight: bold;
+        }
+        .result-value {
+            flex-grow: 1;
+            word-break: break-all;
+            padding: 5px;
+            background-color: white;
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+        .ascii-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .ascii-table th, .ascii-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .ascii-table th {
+            background-color: #f5f5f5;
+        }
+        .ascii-summary {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        .image-background {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 80%;
+            z-index: 1;
+            opacity: 99999999;
+        }
+    </style>
+</head>
+<body>
+    <img src="C:\Users\HP\OneDrive\Máy tính\base\ascii.jpg" alt="ASCII Table Background" class="image-background">
+    <div class="content">
+        <!-- Giữ nguyên phần HTML đã có -->
+        <h1>Chuyển đổi tất cả hệ cơ số</h1>
+        
+        <div class="converter">
+            <label for="binary">Nhị phân (Base 2):</label>
+            <input type="text" id="binary" placeholder="Nhập các số nhị phân, cách nhau bởi dấu cách">
+            <div class="error-message" id="binary-error"></div>
+            <div class="result-container" id="binary-results"></div>
+        </div>
+
+        <div class="converter">
+            <label for="decimal">Thập phân (Base 10):</label>
+            <input type="text" id="decimal" placeholder="Nhập các số thập phân, cách nhau bởi dấu cách">
+            <div class="error-message" id="decimal-error"></div>
+            <div class="result-container" id="decimal-results"></div>
+        </div>
+
+        <div class="converter">
+            <label for="hexadecimal">Thập lục phân (Base 16):</label>
+            <input type="text" id="hexadecimal" placeholder="Nhập các số thập lục phân, cách nhau bởi dấu cách">
+            <div class="error-message" id="hexadecimal-error"></div>
+            <div class="result-container" id="hexadecimal-results"></div>
+        </div>
+
+        <div class="converter">
+            <label for="octal">Bát phân (Base 8):</label>
+            <input type="text" id="octal" placeholder="Nhập các số bát phân, cách nhau bởi dấu cách">
+            <div class="error-message" id="octal-error"></div>
+            <div class="result-container" id="octal-results"></div>
+        </div>
+
+        <div class="converter">
+            <label for="ascii">ASCII:</label>
+            <input type="text" id="ascii" placeholder="Nhập chuỗi ASCII">
+            <div class="error-message" id="ascii-error"></div>
+            <div class="ascii-summary" id="ascii-summary" style="display: none;">
+                <div class="result-row">
+                    <span class="result-label">Decimal:</span>
+                    <span class="result-value" id="ascii-decimal"></span>
+                    <button class="copy-button" onclick="copyText('ascii-decimal')">Copy</button>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Hexadecimal:</span>
+                    <span class="result-value" id="ascii-hex"></span>
+                    <button class="copy-button" onclick="copyText('ascii-hex')">Copy</button>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Octal:</span>
+                    <span class="result-value" id="ascii-octal"></span>
+                    <button class="copy-button" onclick="copyText('ascii-octal')">Copy</button>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Binary:</span>
+                    <span class="result-value" id="ascii-binary"></span>
+                    <button class="copy-button" onclick="copyText('ascii-binary')">Copy</button>
+                </div>
+            </div>
+            <table class="ascii-table" id="ascii-table" style="display: none">
+                <thead>
+                    <tr>
+                        <th>Ký tự</th>
+                        <th>Decimal</th>
+                        <th>Hexadecimal</th>
+                        <th>Octal</th>
+                        <th>Binary</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Patterns for validation
+        const patterns = {
+            binary: /^[01]+$/,
+            decimal: /^\d+$/,
+            hexadecimal: /^[0-9A-Fa-f]+$/,
+            octal: /^[0-7]+$/
+        };
+
+        // Function to validate individual number based on base
+        function validateNumber(number, base) {
+            switch(base) {
+                case 2: return patterns.binary.test(number);
+                case 10: return patterns.decimal.test(number);
+                case 16: return patterns.hexadecimal.test(number);
+                case 8: return patterns.octal.test(number);
+                default: return true;
+            }
+        }
+
+        // Function to show error message
+        function showError(inputId, message) {
+            const errorDiv = document.getElementById(`${inputId}-error`);
+            const input = document.getElementById(inputId);
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            input.classList.add('error');
+        }
+
+        // Function to hide error message
+        function hideError(inputId) {
+            const errorDiv = document.getElementById(`${inputId}-error`);
+            const input = document.getElementById(inputId);
+            errorDiv.style.display = 'none';
+            input.classList.remove('error');
+        }
+
+        // Function to create result row
+        function createResultRow(label, value) {
+            return `
+                <div class="result-row">
+                    <span class="result-label">${label}:</span>
+                    <span class="result-value">${value}</span>
+                    <button class="copy-button" onclick="copyToClipboard('${value}')">Copy</button>
+                </div>
+            `;
+        }
+
+        // Function to get ASCII character from decimal value
+        function getAsciiChar(decimal) {
+            if (decimal >= 32 && decimal <= 126) {
+                return String.fromCharCode(decimal);
+            }
+            return '�'; // Return replacement character for non-printable ASCII
+        }
+
+        // Function to handle number conversion
+        function handleNumberConversion(input, fromBase) {
+            const numbers = input.trim().split(/\s+/);
+            if (input.trim() === '') {
+                document.getElementById(`${getBaseId(fromBase)}-results`).style.display = 'none';
+                hideError(getBaseId(fromBase));
+                return;
+            }
+
+            let results = [];
+            let hasError = false;
+
+            for (let num of numbers) {
+                if (!validateNumber(num, fromBase)) {
+                    showError(getBaseId(fromBase), `Giá trị không hợp lệ: ${num}`);
+                    hasError = true;
+                    break;
+                }
+
+                try {
+                    const decimal = parseInt(num, fromBase);
+                    results.push({
+                        original: num,
+                        decimal: decimal.toString(10),
+                        binary: decimal.toString(2),
+                        hexadecimal: decimal.toString(16).toUpperCase(),
+                        octal: decimal.toString(8),
+                        ascii: getAsciiChar(decimal)
+                    });
+                } catch (e) {
+                    showError(getBaseId(fromBase), `Lỗi chuyển đổi: ${num}`);
+                    hasError = true;
+                    break;
+                }
+            }
+
+            if (!hasError) {
+                hideError(getBaseId(fromBase));
+                const resultContainer = document.getElementById(`${getBaseId(fromBase)}-results`);
+                resultContainer.style.display = 'block';
+                resultContainer.innerHTML = `
+                    ${createResultRow('Binary', results.map(r => r.binary).join(' '))}
+                    ${createResultRow('Decimal', results.map(r => r.decimal).join(' '))}
+                    ${createResultRow('Hexadecimal', results.map(r => r.hexadecimal).join(' '))}
+                    ${createResultRow('Octal', results.map(r => r.octal).join(' '))}
+                    ${createResultRow('ASCII', results.map(r => r.ascii).join(' '))}
+                `;
+            }
+        }
+
+        // Function to handle ASCII conversion
+        function handleAsciiConversion(input) {
+            if (input === '') {
+                document.getElementById('ascii-summary').style.display = 'none';
+                document.getElementById('ascii-table').style.display = 'none';
+                hideError('ascii');
+                return;
+            }
+
+            const chars = input.split('');
+            const decimalValues = chars.map(char => char.charCodeAt(0));
+            
+            // Update summary
+            document.getElementById('ascii-decimal').textContent = decimalValues.join(' ');
+            document.getElementById('ascii-hex').textContent = decimalValues.map(d => d.toString(16).toUpperCase()).join(' ');
+            document.getElementById('ascii-octal').textContent = decimalValues.map(d => d.toString(8)).join(' ');
+            document.getElementById('ascii-binary').textContent = decimalValues.map(d => d.toString(2)).join(' ');
+            
+            document.getElementById('ascii-summary').style.display = 'block';
+
+            // Update table
+            const tbody = document.getElementById('ascii-table').querySelector('tbody');
+            tbody.innerHTML = chars.map(char => `
+                <tr>
+                    <td>${char}</td>
+                    <td>${char.charCodeAt(0)}</td>
+                    <td>${char.charCodeAt(0).toString(16).toUpperCase()}</td>
+                    <td>${char.charCodeAt(0).toString(8)}</td>
+                    <td>${char.charCodeAt(0).toString(2)}</td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('ascii-table').style.display = 'table';
+        }
+
+        // Helper function to get base identifier
+        function getBaseId(base) {
+            switch(base) {
+                case 2: return 'binary';
+                case 10: return 'decimal';
+                case 16: return 'hexadecimal';
+                case 8: return 'octal';
+                default: return '';
+            }
+        }
+
+        // Copy to clipboard function
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
+
+        // Function to copy text from element
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            copyToClipboard(text);
+        }
+
+        // Event listeners
+        document.getElementById('binary').addEventListener('input', (e) => handleNumberConversion(e.target.value, 2));
+        document.getElementById('decimal').addEventListener('input', (e) => handleNumberConversion(e.target.value, 10));
+        document.getElementById('hexadecimal').addEventListener('input', (e) => handleNumberConversion(e.target.value, 16));
+        document.getElementById('octal').addEventListener('input', (e) => handleNumberConversion(e.target.value, 8));
+        document.getElementById('ascii').addEventListener('input', (e) => handleAsciiConversion(e.target.value));
+    </script>
+</body>
+</html>
